@@ -14,10 +14,10 @@ export const Navbar = () => {
 				<div className="d-flex gap-2 ml-auto">
 					<div className="dropdown">
 						<button className="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-							Favorites
+							Favorites {store.favorites ? store.favorites.length : ""}
 						</button>
 						<ul className="dropdown-menu p-2">
-							{store.favorites.length === 0 ?
+							{store.favorites == null || store.favorites.length === 0 ?
 								<span>empty</span>
 								:
 								store.favorites.map((fav) => {

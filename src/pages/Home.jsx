@@ -6,6 +6,9 @@ export const Home = () => {
 
 	const { store, dispatch } = useGlobalReducer()
 	const [data, setData] = useState([])
+	const [localStorageData, setlocalStorageData] = useState(JSON.parse(localStorage.getItem('data')));
+	console.log("esto es localStorageData",localStorageData);
+	
 
 	const urls = {
 		people: "https://www.swapi.tech/api/people/",
@@ -16,7 +19,7 @@ export const Home = () => {
 	}
 
 	console.log(store);
-	
+
 
 	async function getData() {
 		try {
@@ -25,6 +28,7 @@ export const Home = () => {
 				return [key, (await resp.json()).results]
 			}))
 			dispatch({ type: "ADD_INFO", payload: Object.fromEntries(responses) })
+
 			return responses
 		}
 		catch (error) {
@@ -37,14 +41,38 @@ export const Home = () => {
 	}
 
 	useEffect(() => {
-		getData().then(setData)
+		localStorage.clear();
+		if (localStorageData == null || localStorageData.length === 0 || Object.keys(localStorageData).length === 0) {
+			console.log("esto es el fetch");
+			getData().then(setData)
+		}
+		else {
+			setData(localStorageData)
+			dispatch({ type: "ADD_DATA_FROM_LS", payload: JSON.parse(localStorage.getItem('data'))})
+			dispatch({ type: "ADD_FAVS_FROM_LS", payload: JSON.parse(localStorage.getItem('favorites'))})
+			console.log("se ejecuta, esto es localStorageData",localStorageData, "y esto store ",store);
+		}
 	}, [])
+
+	useEffect(() => {
+		console.log("Esto es data ", data);
+		localStorage.setItem('data', JSON.stringify(data))
+	}, [data])
+
+	useEffect(() => {
+		if ( store.favorites || store.data ) {
+			console.log("Carga la data del LS");
+			
+			localStorage.setItem('favorites', JSON.stringify(store.favorites))
+			localStorage.setItem('data', JSON.stringify(store.data))
+		}
+	}, [store])
 
 
 	return (
 		<div className="p-3">
 			{data &&
-				data?.map((category,index) => {
+				data?.map((category, index) => {
 					return (
 						<div className="my-4" key={index}>
 							<h3>{capitalize(category[0])}</h3>
@@ -52,7 +80,7 @@ export const Home = () => {
 								{category &&
 									category[1]?.map((item, index) => {
 										return (
-											<Cards key={index} name={item.name} id={item.uid} url={item.url} category={category[0]}/>
+											<Cards key={index} name={item.name} id={item.uid} url={item.url} category={category[0]} />
 										)
 									})}
 							</div>
