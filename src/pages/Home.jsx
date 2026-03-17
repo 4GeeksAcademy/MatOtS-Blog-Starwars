@@ -5,10 +5,10 @@ import Cards from "../components/Cards.jsx";
 export const Home = () => {
 
 	const { store, dispatch } = useGlobalReducer()
-	const [data, setData] = useState([])
-	const [localStorageData, setlocalStorageData] = useState(JSON.parse(localStorage.getItem('data')));
-	console.log("esto es localStorageData",localStorageData);
+	const [data, setData] = useState(JSON.parse(localStorage.getItem('data')) ? Object.entries(JSON.parse(localStorage.getItem('data'))) : [])
+	console.log("esto es data ",data);
 	
+
 
 	const urls = {
 		people: "https://www.swapi.tech/api/people/",
@@ -41,28 +41,25 @@ export const Home = () => {
 	}
 
 	useEffect(() => {
-		localStorage.clear();
-		if (localStorageData == null || localStorageData.length === 0 || Object.keys(localStorageData).length === 0) {
+		if (data == null || data.length === 0 || Object.keys(data).length === 0) {
 			console.log("esto es el fetch");
 			getData().then(setData)
 		}
 		else {
-			setData(localStorageData)
-			dispatch({ type: "ADD_DATA_FROM_LS", payload: JSON.parse(localStorage.getItem('data'))})
-			dispatch({ type: "ADD_FAVS_FROM_LS", payload: JSON.parse(localStorage.getItem('favorites'))})
-			console.log("se ejecuta, esto es localStorageData",localStorageData, "y esto store ",store);
+			setData(Object.entries(JSON.parse(localStorage.getItem('data'))))
+			dispatch({ type: "ADD_DATA_FROM_LS", payload: JSON.parse(localStorage.getItem('data')) })
+			dispatch({ type: "ADD_FAVS_FROM_LS", payload: JSON.parse(localStorage.getItem('favorites')) })
+			console.log("Carga la data del LS");
+			console.log("se ejecuta, esto store ", store, " esto es data ", data);
 		}
 	}, [])
 
 	useEffect(() => {
-		console.log("Esto es data ", data);
 		localStorage.setItem('data', JSON.stringify(data))
 	}, [data])
 
 	useEffect(() => {
-		if ( store.favorites || store.data ) {
-			console.log("Carga la data del LS");
-			
+		if (store.favorites || store.data.length != 0) {
 			localStorage.setItem('favorites', JSON.stringify(store.favorites))
 			localStorage.setItem('data', JSON.stringify(store.data))
 		}
